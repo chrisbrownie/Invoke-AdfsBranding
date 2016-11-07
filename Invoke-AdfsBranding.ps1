@@ -108,7 +108,6 @@ Param(
     
     if ($fileContent -match [System.Text.RegularExpressions.Regex]::Escape($StartString)) {
         $numberOflines = $fileContent.Length
-        $FoundString = $false
         
         $startLineNumber = $null
         $endLineNumber = $null
