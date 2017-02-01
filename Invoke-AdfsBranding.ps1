@@ -347,7 +347,7 @@ Write-Verbose "Uploading web theme."
 
 $AdditionalFileResources = @{
         Uri = "/adfs/portal/script/onload.js"
-        Path = (Join-Path $CustomThemePath "script\onload.js")
+        Path = "$(Join-Path $CustomThemePath "script\onload.js")"
     }
 
 if ($params.FavIcon) {
