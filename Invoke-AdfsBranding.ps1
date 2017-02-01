@@ -220,9 +220,30 @@ Set-AdfsGlobalWebContent `
 
 # These are the simple modifications that AD FS supports natively, within the web theme
 Write-Verbose "Setting AdfsWebTheme illustration and logo."
-Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
-    -Illustration @{Path=$params.Illustration} `
-    -Logo @{Path=$params.Logo}
+
+$logoExists = try { Test-Path $params.Logo -ErrorAction Stop } catch { $false }
+$illustrationExists = try { Test-Path $params.Illustration -ErrorAction Stop } catch { $false }
+
+if ($logoExists -and $illustrationExists) {
+    # Both the logo and the illustration exist
+    Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
+        -Illustration @{Path=$params.Illustration} `
+        -Logo @{Path=$params.Logo}
+} elseif ($logoExists) {
+    # Only the logo exists
+    Write-Verbose "Could not find illustration path. Not changing illustration."
+    Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
+        -Logo @{Path=$params.Logo}
+} elseif ($illustrationExists) {
+    # Only the illustration exists
+    Write-Verbose "Could not find logo path. Not changing logo."
+    Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
+        -Illustration @{Path=$params.Illustration}
+} else {
+    # Neither the logo nor the illustration exist
+    Write-Verbose "Could not find illustration or logo paths. Not changing either."
+    # Do nothing
+}
 
 #region ChangeUsernamePlaceholder
 
@@ -331,10 +352,15 @@ $AdditionalFileResources = @{
 
 if ($params.FavIcon) {
     # We need to upload the favicon, so add it to the list
-     $AdditionalFileResources += @{
-         Uri = "/adfs/portal/logo/favicon.ico"
-         Path = (Join-Path $CustomThemePath "script\onload.js")
-     }
+    $faviconExists = try { Test-Path $params.FavIcon -ErrorAction Stop } catch { $false }
+    if ($faviconExists) {
+        $AdditionalFileResources += @{
+             Uri = "/adfs/portal/logo/favicon.ico"
+             Path = "$(Join-Path $CustomThemePath "script\onload.js")"
+        }
+    } else {
+        Write-Verbose "Could not locate favicon"
+    }
 }
 
 
