@@ -365,7 +365,7 @@ if ($params.FavIcon) {
     if ($faviconExists) {
         $AdditionalFileResources += @{
             Uri  = "/adfs/portal/logo/favicon.ico"
-            Path = "$(Join-Path $CustomThemePath "script\onload.js")"
+            Path = $params.FavIcon
         }
     }
     else {
