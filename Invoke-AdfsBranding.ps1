@@ -51,9 +51,9 @@ DEALINGS IN THE SOFTWARE.
 
 $params = @{
     # Script Settings
-    "AdfsCustomThemeName" = "CustomTheme1"
-    "AdfsAssetsBaseDirectory" = "C:\adfs\assets"
-    "AdfsCustomThemeBaseDirectory" = "C:\adfs\themes-working"
+    "AdfsCustomThemeName"                               = "CustomTheme1"
+    "AdfsAssetsBaseDirectory"                           = "C:\adfs\assets"
+    "AdfsCustomThemeBaseDirectory"                      = "C:\adfs\themes-working"
 
     # Global Web Content
     "CertificatePageDescriptionText"                    = $null
@@ -90,16 +90,16 @@ $params = @{
     "Illustration"                                      = "C:\adfs\assets\illustration.png"
     "Favicon"                                           = "C:\adfs\assets\favicon.ico"
 
-    }
+}
 
 #region HelperFunctions
 
 function AddOrUpdateTextInFile() {
-Param(
-    $File,
-    [string]$StartString,
-    [string]$EndString,
-    [string]$ReplacementString
+    Param(
+        $File,
+        [string]$StartString,
+        [string]$EndString,
+        [string]$ReplacementString
     )
     
     # Source: https://gist.github.com/chrisbrownie/dccdd150e683718d682a0bbbb7e93952
@@ -112,22 +112,24 @@ Param(
         $startLineNumber = $null
         $endLineNumber = $null
 
-        for ($i=0; $i -lt $numberOflines; $i++) {
+        for ($i = 0; $i -lt $numberOflines; $i++) {
             if (-not ($startLineNumber) -and ($fileContent[$i].ToString().Trim() -eq $StartString)) {
                 $startLineNumber = $i
-            } elseif (-not ($endLineNumber) -and ($fileContent[$i].ToString().Trim() -eq $EndString)) {
+            }
+            elseif (-not ($endLineNumber) -and ($fileContent[$i].ToString().Trim() -eq $EndString)) {
                 $endLineNumber = $i
             }   
         }
 
-        $FileStartPart = $fileContent[0..($startLineNumber-1)]
-        $FileEndPart = $fileContent[($endLineNumber+1)..$numberOflines]
+        $FileStartPart = $fileContent[0..($startLineNumber - 1)]
+        $FileEndPart = $fileContent[($endLineNumber + 1)..$numberOflines]
         
-        $NewContent = ($FileStartPart +  $ReplacementString + $FileEndPart) -join "`r`n"
+        $NewContent = ($FileStartPart + $ReplacementString + $FileEndPart) -join "`r`n"
 
         $NewContent | Out-File $File -Encoding ascii
 
-    } else {
+    }
+    else {
         # Could not find the start string, append to the end
         Add-Content -Path $File -Value "`r`n" -Encoding ascii
         Add-Content -Path $File -Value "$StartString`r`n" -Encoding ascii
@@ -146,10 +148,12 @@ function Get-AdfsServiceStatus {
     try {
         if ((Get-Service -Name AdfsSrv -ComputerName $ComputerName).Status -eq "Running") {
             return $true
-        } else {
+        }
+        else {
             return $false 
         }
-    } catch {
+    }
+    catch {
         return $false
     }
 
@@ -173,7 +177,8 @@ Import-Module Adfs -Verbose:$false
 if (Get-AdfsWebTheme -name $params.AdfsCustomThemeName) {
     Write-Verbose "Using existing theme '$($params.AdfsCustomThemeName)'."
     $customTheme = Get-AdfsWebTheme -Name $Params.AdfsCustomThemeName
-} else {
+}
+else {
     Write-Verbose "Creating theme '$($params.AdfsCustomThemeName)'."
     New-AdfsWebTheme `
         -Name $params.AdfsCustomThemeName `
@@ -227,19 +232,22 @@ $illustrationExists = try { Test-Path $params.Illustration -ErrorAction Stop } c
 if ($logoExists -and $illustrationExists) {
     # Both the logo and the illustration exist
     Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
-        -Illustration @{Path=$params.Illustration} `
-        -Logo @{Path=$params.Logo}
-} elseif ($logoExists) {
+        -Illustration @{Path = $params.Illustration} `
+        -Logo @{Path = $params.Logo}
+}
+elseif ($logoExists) {
     # Only the logo exists
     Write-Verbose "Could not find illustration path. Not changing illustration."
     Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
-        -Logo @{Path=$params.Logo}
-} elseif ($illustrationExists) {
+        -Logo @{Path = $params.Logo}
+}
+elseif ($illustrationExists) {
     # Only the illustration exists
     Write-Verbose "Could not find logo path. Not changing logo."
     Set-AdfsWebTheme -TargetName $params.AdfsCustomThemeName `
-        -Illustration @{Path=$params.Illustration}
-} else {
+        -Illustration @{Path = $params.Illustration}
+}
+else {
     # Neither the logo nor the illustration exist
     Write-Verbose "Could not find illustration or logo paths. Not changing either."
     # Do nothing
@@ -331,7 +339,8 @@ if ($params.HideCopyright) {
     (Get-Content $cssPath) | ForEach-Object {
         if ($_.Trim() -eq $defaultCopyrightString) {
             '#copyright {display: none;}'
-        } else {
+        }
+        else {
             $_
         }
     } | Set-Content $cssPath
@@ -346,19 +355,20 @@ if ($params.HideCopyright) {
 Write-Verbose "Uploading web theme."
 
 $AdditionalFileResources = @{
-        Uri = "/adfs/portal/script/onload.js"
-        Path = "$(Join-Path $CustomThemePath "script\onload.js")"
-    }
+    Uri  = "/adfs/portal/script/onload.js"
+    Path = "$(Join-Path $CustomThemePath "script\onload.js")"
+}
 
 if ($params.FavIcon) {
     # We need to upload the favicon, so add it to the list
     $faviconExists = try { Test-Path $params.FavIcon -ErrorAction Stop } catch { $false }
     if ($faviconExists) {
         $AdditionalFileResources += @{
-             Uri = "/adfs/portal/logo/favicon.ico"
-             Path = "$(Join-Path $CustomThemePath "script\onload.js")"
+            Uri  = "/adfs/portal/logo/favicon.ico"
+            Path = "$(Join-Path $CustomThemePath "script\onload.js")"
         }
-    } else {
+    }
+    else {
         Write-Verbose "Could not locate favicon"
     }
 }
@@ -366,9 +376,9 @@ if ($params.FavIcon) {
 
 Set-AdfsWebTheme -TargetName $customTheme.Name `
     -StyleSheet @{
-        Locale=""
-        Path="$(Join-Path $CustomThemePath "css\style.css")"
-    } `
+    Locale = ""
+    Path   = "$(Join-Path $CustomThemePath "css\style.css")"
+} `
     -AdditionalFileResource $AdditionalFileResources
 
 # Activate web theme
