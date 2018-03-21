@@ -309,7 +309,7 @@ Write-Verbose "Changing Login button colour."
 $buttonColourCss = @"
 span.submit, input[type="submit"] {
     background-color: $($params.ButtonBackgroundColour) !important;
-    color: @($params.ButtonForegroundColour) !important;
+    color: $($params.ButtonForegroundColour) !important;
 }
 "@
 
