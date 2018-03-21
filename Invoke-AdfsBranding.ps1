@@ -49,7 +49,7 @@ DEALINGS IN THE SOFTWARE.
 #requires -Modules Adfs
 #requires -RunAsAdministrator
 
-$params = @{
+params = @{
     # Script Settings
     "AdfsCustomThemeName"                               = "CustomTheme1"
     "AdfsAssetsBaseDirectory"                           = "C:\adfs\assets"
@@ -314,6 +314,19 @@ span.submit, input[type="submit"] {
 "@
 
 AddOrUpdateTextInFile -File $(Join-Path $CustomThemePath "css\style.css") -StartString "/*STARTLOGINBUTTONCSSFIX*/" -EndString "/*ENDLOGINBUTTONCSSFIX*/" -ReplacementString $buttonColourCss
+
+#endregion
+
+#region ChangeLinkColour
+Write-Verbose "Changing link colour."
+
+$linkColourCss = @"
+a {
+    color: $($params.LinkColour) !important;
+}
+"@
+
+AddOrUpdateTextInFile -File $(Join-Path $CustomThemePath "css\style.css") -StartString "/*STARTLINKCSSFIX*/" -EndString "/*ENDLINKCSSFIX*/" -ReplacementString $linkColourCss
 
 #endregion
 
